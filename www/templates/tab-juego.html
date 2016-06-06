@@ -1,38 +1,59 @@
 <ion-view view-title="SpyFall">
   <ion-content class="padding">
 
+    <h2 class="center" ng-show="playersNotViewed()">Lista de Jugadores</h2>
     <div ng-hide="started">
-      <h2 class="center">Lista de Jugadores</h2>
-      <ion-list>
-        <ion-item class="item item-input-inset" ng-repeat="player in players"
-            on-swipe-right="quitar()">
-          <label class="item-input-wrapper">
-            <input type="text" placeholder="Nombre del jugador" ng-model="player.name">
-          </label>
-          <button class="button button-small button-assertive"
-                  ng-click="quitar($index)"
-                  ng-hide="players.length < 5">
-            <i class="icon ion-trash-a"></i>
-          </button>
-        </ion-item>
-      </ion-list>
+      <p>Arme la lista de jugadores con los nombres de cada uno.</p>
+      <p>Deben ser al menos {{ minimumPlayersAmount }}</p>
+      <form name="player_list">
+        <ion-list>
+          <ion-item class="item item-input-inset" ng-repeat="player in players"
+              on-swipe-right="quitar()">
+            <label class="item-input-wrapper"
+                   ng-class="{ 'required': submitted && player_list['jugador' + $index].$error.required }">
+              <input type="text"
+                     name="{{ 'jugador' + $index }}"
+                     placeholder="{{ 'Nombre del jugador ' + ($index +1) }}"
+                     ng-model="player.name"
+                     required />
+            </label>
+            <button class="button button-small button-assertive"
+                    ng-click="quitar($index)"
+                    ng-hide="players.length === minimumPlayersAmount">
+              <i class="icon ion-trash-a"></i>
+            </button>
+          </ion-item>
+        </ion-list>
+      </form>
       <button class="button button-full button-positive"
               ng-click="agregar()">
         Agregar Jugador
       </button>
       <button class="button button-full button-balanced"
-              ng-click="comenzar()">
+              ng-click="comenzar(player_list)">
         Comenzar el Juego
       </button>
     </div>
 
     <div ng-show="started">
-      <h1 ng-class="{ 'stable': paused }"
-          class="center">{{ time | date:'mm:ss' }}</h1>
+      <p ng-show="playersNotViewed()">
+        Cada jugador debe pulsar sobre su nombre antes de iniciar el juego.
+      </p>
+      <ion-list>
+        <ion-item ng-repeat="player in players"
+                  ng-hide="player.viewed">
+          <button class="button button-block button-positive"
+                  ng-click="ver($index)">
+            {{ player.name }}
+          </button>
+        </ion-item>
+      </ion-list>
+      <h1 ng-class="{ 'stable': paused && stable }"
+          class="center transition">{{ time | date:'mm:ss' }}</h1>
 
       <button class="button button-full button-calm"
               ng-click="pausar()"
-              ng-hide="paused">
+              ng-show="paused === false">
         Pausar
       </button>
 
@@ -42,8 +63,16 @@
         Reanudar
       </button>
 
+      <button class="button button-full button-balanced"
+              ng-click="reanudar()"
+              ng-show="paused === undefined"
+              ng-disabled="playersNotViewed()">
+        Iniciar Temporizador
+      </button>
+
       <button class="button button-full button-assertive"
-              ng-click="finalizar()">
+              ng-click="finalizar()"
+              ng-show="paused !== undefined">
         Finalizar el Juego
       </button>
     </div>

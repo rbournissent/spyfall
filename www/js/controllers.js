@@ -4,18 +4,11 @@ angular.module('spyFall.controllers', [])
   // TODO: HomeCtrl
 })
 
-.controller('JuegoCtrl', function ($scope, $interval, $ionicModal) {
+.controller('JuegoCtrl', function ($scope, $interval, $timeout, $ionicModal) {
   var interval = null;
-  var defaultGameTime = 10 * 1000; // 8 minutes
-  $scope.players = [{
-    name: 'Nombre del Jugador 1'
-  }, {
-    name: 'Nombre del Jugador 2'
-  }, {
-    name: 'Nombre del Jugador 3'
-  }, {
-    name: 'Nombre del Jugador 4'
-  }];
+  var defaultGameTime = 8 * 60 * 1000; // 8 minutes
+  $scope.minimumPlayersAmount = 3;
+  $scope.players = [];
 
   $scope.places = [
     'Avión',
@@ -47,26 +40,44 @@ angular.module('spyFall.controllers', [])
     'Universidad'
   ];
 
+  $interval(function () {
+    $scope.stable = !$scope.stable;
+  }, 500);
+
   $scope.agregar = function () {
-    var playerNumber = $scope.players.length + 1;
-    $scope.players.push({ name: 'Nombre del Jugador ' + playerNumber });
+    $scope.players.push({ name: '' });
   };
+
+  for (var i = 1; i <= $scope.minimumPlayersAmount; i++) {
+    $scope.agregar();
+  }
 
   $scope.quitar = function (index) {
-    $scope.players.splice(index, 1);
+    if ($scope.players.length > $scope.minimumPlayersAmount) {
+      $scope.players.splice(index, 1);
+    }
   };
 
-  $scope.comenzar = function () {
-    $scope.started = true;
-    $scope.time = defaultGameTime;
-    $scope.spy = Math.floor(Math.random() * $scope.players.length);
-    $scope.place = Math.floor(Math.random() * $scope.places.length);
-    $scope.reanudar();
+  $scope.comenzar = function (form) {
+    $scope.submitted = true;
+
+    if (form.$valid) {
+      $scope.started = true;
+      $scope.paused = undefined;
+      $scope.time = defaultGameTime;
+      $scope.spy = Math.floor(Math.random() * $scope.players.length);
+      $scope.place = Math.floor(Math.random() * $scope.places.length);
+      $scope.players.forEach(function (player) {
+        player.viewed = false;
+      });
+    }
   };
 
   $scope.finalizar = function () {
-    $scope.started = false;
-    $scope.openModal();
+    $timeout(function () {
+      $scope.started = false;
+    }, 300);
+    $scope.openResult();
     $interval.cancel(interval);
   };
 
@@ -85,24 +96,63 @@ angular.module('spyFall.controllers', [])
     }, 1000);
   };
 
+  $scope.ver = function (index) {
+    $timeout(function () {
+      $scope.players[index].viewed = true;
+    }, 300);
+    $scope.activePlayer = $scope.players[index];
+    if (index === $scope.spy) {
+      $scope.activePlayer.place = '???';
+      $scope.activePlayer.spy = 'Tú eres el espía';
+    } else {
+      $scope.activePlayer.place = $scope.places[$scope.place];
+      $scope.activePlayer.spy = '???';
+    }
+    $scope.openPlayerInfo();
+  };
+
+  $scope.playersNotViewed = function () {
+    var playersNotViewed = $scope.players.filter(function (player) {
+      return !player.viewed;
+    });
+
+    return playersNotViewed.length;
+  };
+
   $ionicModal.fromTemplateUrl('result.html', {
     scope: $scope,
     animation: 'slide-in-up'
   }).then(function (modal) {
-    $scope.modal = modal;
+    $scope.resultModal = modal;
   });
 
-  $scope.openModal = function () {
-    $scope.modal.show();
+  $scope.openResult = function () {
+    $scope.resultModal.show();
   };
 
-  $scope.closeModal = function () {
-    $scope.modal.hide();
+  $scope.closeResult = function () {
+    $scope.resultModal.hide();
+  };
+
+  $ionicModal.fromTemplateUrl('player-info.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function (modal) {
+    $scope.playerInfoModal = modal;
+  });
+
+  $scope.openPlayerInfo = function () {
+    $scope.playerInfoModal.show();
+  };
+
+  $scope.closePlayerInfo = function () {
+    $scope.playerInfoModal.hide();
   };
 
   // Cleanup the modal when we're done with it!
   $scope.$on('$destroy', function () {
-    $scope.modal.remove();
+    $scope.resultModal.remove();
+    $scope.playerInfoModal.remove();
   });
 })
 

@@ -35,7 +35,22 @@
       <p>Lugar: <strong>{{ places[place] }}</strong></p>
       <p>Espía: <strong>{{ players[spy].name }}</strong></p>
       <p class="center">
-        <button class="button button-assertive" ng-click="closeModal()">Cerrar</button>
+        <button class="button button-assertive" ng-click="closeResult()">Cerrar</button>
+      </p>
+    </ion-content>
+  </ion-modal-view>
+</script>
+
+<script id="player-info.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar>
+      <h1 class="title">{{ activePlayer.name }}</h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <p>Lugar: <strong>{{ activePlayer.place }}</strong></p>
+      <p>Espía: <strong>{{ activePlayer.spy }}</strong></p>
+      <p class="center">
+        <button class="button button-assertive" ng-click="closePlayerInfo()">Cerrar</button>
       </p>
     </ion-content>
   </ion-modal-view>
