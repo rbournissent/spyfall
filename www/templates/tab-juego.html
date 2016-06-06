@@ -1,0 +1,65 @@
+<ion-view view-title="SpyFall">
+  <ion-content class="padding">
+
+    <div ng-hide="started">
+      <h2 class="center">Lista de Jugadores</h2>
+      <ion-list>
+        <ion-item class="item item-input-inset" ng-repeat="player in players"
+            on-swipe-right="quitar()">
+          <label class="item-input-wrapper">
+            <input type="text" placeholder="Nombre del jugador" ng-model="player.name">
+          </label>
+          <button class="button button-small button-assertive"
+                  ng-click="quitar($index)"
+                  ng-hide="players.length < 5">
+            <i class="icon ion-trash-a"></i>
+          </button>
+        </ion-item>
+      </ion-list>
+      <button class="button button-full button-positive"
+              ng-click="agregar()">
+        Agregar Jugador
+      </button>
+      <button class="button button-full button-balanced"
+              ng-click="comenzar()">
+        Comenzar el Juego
+      </button>
+    </div>
+
+    <div ng-show="started">
+      <h1 ng-class="{ 'stable': paused }"
+          class="center">{{ time | date:'mm:ss' }}</h1>
+
+      <button class="button button-full button-calm"
+              ng-click="pausar()"
+              ng-hide="paused">
+        Pausar
+      </button>
+
+      <button class="button button-full button-balanced"
+              ng-click="reanudar()"
+              ng-show="paused && time">
+        Reanudar
+      </button>
+
+      <button class="button button-full button-assertive"
+              ng-click="finalizar()">
+        Finalizar el Juego
+      </button>
+    </div>
+
+    <h3 class="center">Lista de lugares</h3>
+    <div class="row">
+      <div class="col col-50">
+        <p ng-repeat="place in places"
+           ng-show="$index <= places.length/2"
+           class="center">{{ place }}</p>
+      </div>
+      <div class="col col-50">
+        <p ng-repeat="place in places"
+           ng-show="$index >= places.length/2"
+           class="center">{{ place }}</p>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>
